@@ -44,10 +44,8 @@ namespace command.Controllers
             commandType.Add("WATERPUMP");
             commandType.Add("HUMIDIFIER");
 
-            //string response = JsonConvert.SerializeObject(new CommandInfoModel(commandType, commandText, humidifier, waterPump, airCooler));
-            Object asd = true;
-            string response = JsonConvert.SerializeObject(asd);
-            
+            string response = JsonConvert.SerializeObject(new CommandInfoModel(commandType, commandText, humidifier, waterPump, airCooler));
+                  
             return Ok(response);
         }
 

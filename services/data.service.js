@@ -35,7 +35,7 @@ module.exports = {
 					const res = await this.influx.query(
 						`select * from soilTemperature where sensorId=${ctx.params.sensorId}`
 					);
-					return res;
+					return { data: res };
 				}
 				catch(err) {
 					console.log(err);
@@ -52,7 +52,7 @@ module.exports = {
 					const res = await this.influx.query(
 						`select * from airTemperature where sensorId=${ctx.params.sensorId}`
 					);
-					return res;
+					return { data: res };
 				}
 				catch(err) {
 					console.log(err);
@@ -69,7 +69,7 @@ module.exports = {
 					const res = await this.influx.query(
 						`select * from RHpercent where sensorId=${ctx.params.sensorId}`
 					);
-					return res;
+					return { data: res };
 				}
 				catch(err) {
 					console.log(err);
@@ -86,7 +86,7 @@ module.exports = {
 					const res = await this.influx.query(
 						`select * from waterContent where sensorId=${ctx.params.sensorId}`
 					);
-					return res;
+					return { data: res };
 				}
 				catch(err) {
 					console.log(err);
@@ -105,7 +105,7 @@ module.exports = {
                 sensorId: sensorId
 			};
 			console.log(body);
-			request.post(process.env.ANALYTICS_URL, {
+			request.post(process.env.ANALYTICS_URL + '/receiveData', {
 				json: body
 			}, (err, res, body) => {
 				if (err) {
