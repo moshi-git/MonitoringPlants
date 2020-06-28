@@ -24,6 +24,8 @@ module.exports = {
 					 this.getWritePoints(ctx.params)
 				 );
 				this.sendParameters(ctx.params.airTemperature, ctx.params.soilTemperature, ctx.params.RHpercent, ctx.params.waterContent, ctx.params.sensorId); 
+			
+				return "Data saved to database";
 			}
 		},
 		readSoilTemperature: {

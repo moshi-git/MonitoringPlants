@@ -3,6 +3,7 @@
 const express = require("express");
 const bodyParser = require('body-parser');
 const request = require('request');
+const cors = require("cors");
 
 module.exports = {
     name: "gateway",
@@ -18,6 +19,9 @@ module.exports = {
             app.get("/waterContent", this.getWaterContent); // Data
             app.get("/deviceInfo", this.getDeviceInfo); // Data
             app.get("/commandList", this.getCommandList); // Command
+            app.get("/getWaterPumpParameters", this.getWaterPumpParameters); // Command
+            app.get("/getAirCoolerParameters", this.getAirCoolerParameters); // Command
+            app.get("/getHumidifierParameters", this.getHumidifierParameters); // Command
             app.get("/notifications", this.getNotifications); // Analytics
             app.put("/setOffset/waterPump", this.setWaterPumpOffset); // Command
             app.put("/setOffset/humidifier", this.setHumidifierOffset); // Command
@@ -40,29 +44,33 @@ module.exports = {
             app.put("/turnOnOrOff/humidifier", this.turnHumidifierOnOrOff); // Device
             app.post("/writeParametersToDatabase", this.writeParametersToDatabase); // Data
         },
-        getCommandList(req, res) {
-            request.get(process.env.COMMAND_URL + '/getCommands', 
+        getExternalData(req, res, url) {
+            request.get(url, 
                 (err, resp, body) => {
                     if (err) {
                         console.log(err);
+                        res.status(err.code || 500).send(err);
                         return;
                     }
                     console.log(res.statusCode);
-                    console.log(body);
+                    //console.log(body);
                     res.send(body)
 			});
         },
+        getWaterPumpParameters(req, res) {
+            this.getExternalData(req, res, process.env.COMMAND_URL + '/getWaterPumpParameters');
+        },
+        getAirCoolerParameters(req, res) {
+            this.getExternalData(req, res, process.env.COMMAND_URL + '/getAirCoolerParameters');
+        },
+        getHumidifierParameters(req, res) {
+            this.getExternalData(req, res, process.env.COMMAND_URL + '/getHumidifierParameters');
+        },
+        getCommandList(req, res) {
+            this.getExternalData(req, res, process.env.COMMAND_URL + '/getCommands');
+        },
         getNotifications(req, res) {
-            request.get(process.env.ANALYTICS_URL + '/queryAll', 
-                (err, resp, body) => {
-                    if (err) {
-                        console.log(err);
-                        return;
-                    }
-                    console.log(res.statusCode);
-                    console.log(body);
-                    res.send(body)
-            });
+            this.getExternalData(req, res, process.env.ANALYTICS_URL + '/queryAll');
         },
         setWaterPumpOffset(req, res) {
             this.putDataCommand(req, res, '/setOffset/waterPump');
@@ -92,15 +100,17 @@ module.exports = {
             this.putDataCommand(req, res, '/setMin/airCooler');
         },
         putDataCommand(req, res, url) {
+            console.log(req.body);
             request.put(process.env.COMMAND_URL + url, {
 				json: req.body
 			}, (err, resp, body) => {
 				if (err) {
-					console.log(err);
+                    console.log(err);
+                    res.status(err.code || 500).send(err);
 					return;
 				}
 				console.log(res.statusCode);
-                console.log(body);
+                //console.log(body);
                 res.send(body)
 			});
         },
@@ -201,6 +211,7 @@ module.exports = {
         const app = express();
         app.use(bodyParser.urlencoded({ extended: false }));
         app.use(bodyParser.json());
+        app.use(cors());
         app.listen(this.settings.port);
         this.initRoutes(app);
         this.app = app;

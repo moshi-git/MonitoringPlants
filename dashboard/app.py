@@ -27,7 +27,7 @@ def getData(url, key, value):
     res = requests.get(url)
     pts = res.json()
     pts = pts[key]
-    #print_log(pts)
+
     x = []
     y = []
     for i, data in enumerate(pts):
@@ -35,14 +35,14 @@ def getData(url, key, value):
         x.append(i)
     return { 'x': x, 'y': y}
     
-def makePlot(period, route):
+def makePlot(period, route, title, line_color):
     source = AjaxDataSource(data_url = request.url_root + route, polling_interval = period, method = 'GET', mode = 'replace')
     
     source.data = dict(x=[], y=[])
     
-    plot = figure(plot_height = 300, sizing_mode = 'scale_width')
+    plot = figure(plot_height = 200, plot_width = 500, sizing_mode = 'scale_width', title = title)
     
-    plot.line('x', 'y', source = source, line_width = 4)  
+    plot.line('x', 'y', source = source, line_width = 4, line_color = line_color)  
     
     script, div = components(plot)
     
@@ -90,9 +90,9 @@ def ShowDashboard():
         plots.append(makeSoilTemperaturePlot())
         plots.append(makeRHpercentPlot())
         plots.append(makeWaterContentPlot())
-        plots.append(makeTable(10000, '/api/NotificationData'))
+        table = makeTable(10000, '/api/NotificationData')
         
-        return render_template('dashboard.html', plots = plots)
+        return render_template('dashboard.html', plots = plots, table = table)
 
 @app.route('/api/AirTemperature', methods = ['GET'])
 def GetAirTemperature():
@@ -117,16 +117,16 @@ def GetWaterContent():
 # -------------------------------------------------------------------------------------------------
 
 def makeAirTemperaturePlot():
-    return makePlot(10000, '/api/AirTemperature')
+    return makePlot(10000, '/api/AirTemperature', "Air temperature on Y ", "gray")
 
 def makeSoilTemperaturePlot():
-    return makePlot(10000, '/api/SoilTemperature')
+    return makePlot(10000, '/api/SoilTemperature', "Soil temperature on Y ", "black")
 
 def makeRHpercentPlot():
-    return makePlot(10000, '/api/RHpercent')
+    return makePlot(10000, '/api/RHpercent', "RH percent on Y ", "red")
 
 def makeWaterContentPlot():
-    return makePlot(10000, '/api/WaterContent')
+    return makePlot(10000, '/api/WaterContent', "Water content on Y ", "blue")
 
 # -------------------------------------------------------------------------------------------------
 
